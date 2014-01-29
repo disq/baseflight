@@ -45,6 +45,11 @@
 #define ID_GYRO_Y             0x41
 #define ID_GYRO_Z             0x42
 
+#define ID_ANGLE_ROLL      0x43
+#define ID_ANGLE_PITCH     0x44
+#define ID_FLAGS                0x45
+#define ID_THROTTLE          0x46
+
 #define ID_VERT_SPEED         0x30 //opentx vario
 
 // from sensors.c
@@ -91,6 +96,41 @@ static void sendAccel(void)
         sendDataHead(ID_ACC_X + i);
         serialize16(((float)accSmooth[i] / acc_1G) * 1000);
     }
+    for (i = 0; i < 2; i++) {
+        sendDataHead(ID_ANGLE_ROLL + i);
+        serialize16(angle[i]);
+    }
+}
+
+static void sendFlags(void)
+{
+    uint16_t flags = 0;
+
+    if (f.ARMED)
+        flags |= 1 << 0;
+    if (f.GPS_FIX)
+        flags |= 1 << 1;
+    if (f.ANGLE_MODE || f.HORIZON_MODE)
+        flags |= 1 << 2;
+    if (f.BARO_MODE)
+        flags |= 1 << 3;
+    if (f.MAG_MODE)
+        flags |= 1 << 4;
+    if (f.GPS_HOME_MODE)
+        flags |= 1 << 5;
+    if (f.GPS_HOLD_MODE)
+        flags |= 1 << 6;
+    if (f.PASSTHRU_MODE)
+        flags |= 1 << 7;
+
+    sendDataHead(ID_FLAGS);
+    serialize16(flags);
+}
+
+static void sendThrottle(void)
+{
+    sendDataHead(ID_THROTTLE);
+    serialize16(constrain((rcCommand[THROTTLE] - mcfg.minthrottle)*100 / (mcfg.maxthrottle - mcfg.minthrottle), 0, 100)); // percent
 }
 
 static void sendBaro(void)
@@ -268,6 +308,8 @@ void sendTelemetry(void)
         if ((cycleNum % 4) == 0) {      // Sent every 500ms
             sendBaro();
             sendHeading();
+            sendFlags();
+            sendThrottle();
             sendTelemetryTail();
         }
 
