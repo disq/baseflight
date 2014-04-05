@@ -140,7 +140,7 @@ void SetSysClock(void)
     RCC->CFGR &= (uint32_t)((uint32_t)~(RCC_CFGR_PLLSRC | RCC_CFGR_PLLXTPRE | RCC_CFGR_PLLMULL));
     *RCC_CRH |= (uint32_t)0x8 << (RCC_CFGR_PLLMULL9 >> 16);
     GPIOC->ODR &= (uint32_t)~(CAN_MCR_RESET);
-    RCC_CFGR_PLLMUL = GPIOC->IDR & CAN_MCR_RESET ? hse_value = 12000000, RCC_CFGR_PLLMULL6 : RCC_CFGR_PLLMULL9;
+    RCC_CFGR_PLLMUL = GPIOC->IDR & CAN_MCR_RESET ? hse_value = 12000000, RCC_CFGR_PLLMULL7 : RCC_CFGR_PLLMULL10;
     switch (clocksrc) {
         case SRC_HSE:
             // PLL configuration: PLLCLK = HSE * 9 = 72 MHz
